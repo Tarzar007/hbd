@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday! 🎂</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fff5f8 0%, #fef3ff 50%, #f0f9ff 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Quicksand', sans-serif;
+      overflow: hidden;
+      position: relative
+    }
+
+    h2.sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0)
+    }
+
+    canvas#fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10
+    }
+
+    .scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      position: relative;
+      z-index: 5;
+      padding: 20px
+    }
+
+    .title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(28px, 6vw, 48px);
+      color: #e91e8c;
+      margin-bottom: 8px;
+      text-align: center;
+      animation: floatIn 1s ease forwards
+    }
+
+    .subtitle {
+      font-size: clamp(12px, 3vw, 15px);
+      color: #c084fc;
+      letter-spacing: 0.15em;
+      text-align: center;
+      margin-bottom: 24px;
+      animation: floatIn 1.2s ease forwards
+    }
+
+    @keyframes floatIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .cake-wrap {
+      position: relative;
+      cursor: default
+    }
+
+    .cake-svg {
+      width: clamp(200px, 55vw, 300px);
+      height: auto;
+      filter: drop-shadow(0 8px 24px rgba(233, 30, 140, 0.15))
+    }
+
+    .flame {
+      animation: flicker 0.4s ease-in-out infinite alternate;
+      transform-origin: 50% 100%
+    }
+
+    .flame-inner {
+      animation: flicker2 0.3s ease-in-out infinite alternate;
+      transform-origin: 50% 100%
+    }
+
+    @keyframes flicker {
+      0% {
+        transform: scaleX(1) scaleY(1) rotate(-2deg)
+      }
+
+      100% {
+        transform: scaleX(0.85) scaleY(0.95) rotate(2deg)
+      }
+    }
+
+    @keyframes flicker2 {
+      0% {
+        transform: scaleX(0.7) scaleY(0.8) rotate(1deg)
+      }
+
+      100% {
+        transform: scaleX(0.9) scaleY(1) rotate(-1deg)
+      }
+    }
+
+    .flame.out,
+    .flame-inner.out {
+      display: none
+    }
+
+    .smoke {
+      display: none;
+      animation: smokeRise 1.5s ease-out forwards
+    }
+
+    .smoke.show {
+      display: block
+    }
+
+    @keyframes smokeRise {
+      0% {
+        opacity: 0.7;
+        transform: translateY(0) scaleX(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-30px) scaleX(2.5)
+      }
+    }
+
+    .btn-blow {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #f472b6, #e879f9);
+      color: white;
+      border: none;
+      padding: clamp(10px, 3vw, 14px) clamp(24px, 6vw, 40px);
+      border-radius: 50px;
+      font-family: 'Quicksand', sans-serif;
+      font-size: clamp(13px, 3.5vw, 16px);
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 20px rgba(244, 114, 182, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.4s;
+      animation: pulseBtn 2s ease-in-out infinite
+    }
+
+    .btn-blow:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 28px rgba(244, 114, 182, 0.55)
+    }
+
+    .btn-blow:active {
+      transform: scale(0.97)
+    }
+
+    @keyframes pulseBtn {
+
+      0%,
+      100% {
+        box-shadow: 0 4px 20px rgba(244, 114, 182, 0.4)
+      }
+
+      50% {
+        box-shadow: 0 4px 32px rgba(244, 114, 182, 0.7)
+      }
+    }
+
+    .btn-blow.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.8)
+    }
+
+    .card-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 240, 250, 0.7);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s
+    }
+
+    .card-overlay.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .birthday-card {
+      background: white;
+      border-radius: 24px;
+      padding: clamp(24px, 6vw, 40px);
+      max-width: min(90vw, 420px);
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(233, 30, 140, 0.18), 0 0 0 1px rgba(233, 30, 140, 0.08);
+      transform: scale(0.7) translateY(40px);
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s;
+      opacity: 0;
+      position: relative;
+      overflow: hidden
+    }
+
+    .birthday-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(244, 114, 182, 0.12), transparent);
+      border-radius: 50%
+    }
+
+    .birthday-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: -30px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(192, 132, 252, 0.12), transparent);
+      border-radius: 50%
+    }
+
+    .card-overlay.show .birthday-card {
+      transform: scale(1) translateY(0);
+      opacity: 1
+    }
+
+    .card-icon {
+      font-size: 48px;
+      margin-bottom: 12px
+    }
+
+    .card-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(26px, 7vw, 38px);
+      color: #e91e8c;
+      margin-bottom: 16px
+    }
+
+    .card-body {
+      font-size: clamp(13px, 3.5vw, 15px);
+      line-height: 1.8;
+      color: #7c3aed;
+      margin-bottom: 20px
+    }
+
+    .card-sign {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(18px, 4vw, 22px);
+      color: #f472b6
+    }
+
+    .card-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f472b6, #e879f9)
+    }
+
+    .btn-close {
+      background: none;
+      border: 1.5px solid #f472b6;
+      color: #e91e8c;
+      padding: 8px 28px;
+      border-radius: 50px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 8px
+    }
+
+    .btn-close:hover {
+      background: #fdf2f8;
+      color: #db2777
+    }
+
+    @media(max-width:400px) {
+      .cake-svg {
+        width: 180px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h2 class="sr-only">เว็บไซต์เซอร์ไพรวันเกิด มีเค้กพร้อมเทียนที่จุดอยู่ กดปุ่มเพื่อเป่าเทียนและรับการ์ดอวยพร</h2>
+  <canvas id="fireworks"></canvas>
+
+  <div class="scene">
+    <div class="title">Happy Birthday! 🎂</div>
+    <div class="subtitle">✦ Kun Kaow ✦</div>
+
+    <div class="cake-wrap">
+      <svg class="cake-svg" viewBox="0 0 300 280" xmlns="http://www.w3.org/2000/svg">
+        <!-- plate shadow -->
+        <ellipse cx="150" cy="262" rx="110" ry="10" fill="rgba(233,30,140,0.08)" />
+        <!-- bottom tier -->
+        <rect x="50" y="190" width="200" height="65" rx="14" fill="#fce7f3" />
+        <rect x="50" y="190" width="200" height="18" fill="#f9a8d4" />
+        <!-- deco bottom -->
+        <circle cx="80" cy="245" r="6" fill="#f472b6" />
+        <circle cx="110" cy="245" r="6" fill="#e879f9" />
+        <circle cx="140" cy="245" r="6" fill="#f472b6" />
+        <circle cx="170" cy="245" r="6" fill="#e879f9" />
+        <circle cx="200" cy="245" r="6" fill="#f472b6" />
+        <circle cx="230" cy="245" r="6" fill="#e879f9" />
+        <!-- middle tier -->
+        <rect x="72" y="130" width="156" height="65" rx="12" fill="#fdf4ff" />
+        <rect x="72" y="130" width="156" height="16" fill="#e879f9" />
+        <!-- deco middle -->
+        <circle cx="100" cy="178" r="5" fill="#c084fc" />
+        <circle cx="125" cy="178" r="5" fill="#f472b6" />
+        <circle cx="150" cy="178" r="5" fill="#c084fc" />
+        <circle cx="175" cy="178" r="5" fill="#f472b6" />
+        <circle cx="200" cy="178" r="5" fill="#c084fc" />
+        <!-- top tier -->
+        <rect x="95" y="78" width="110" height="57" rx="10" fill="#fce7f3" />
+        <rect x="95" y="78" width="110" height="14" fill="#f9a8d4" />
+        <!-- frosting drips top -->
+        <ellipse cx="110" cy="78" rx="8" ry="6" fill="white" />
+        <ellipse cx="135" cy="78" rx="7" ry="5" fill="white" />
+        <ellipse cx="160" cy="78" rx="8" ry="6" fill="white" />
+        <ellipse cx="185" cy="78" rx="7" ry="5" fill="white" />
+        <!-- frosting drips middle -->
+        <ellipse cx="90" cy="130" rx="8" ry="5" fill="white" />
+        <ellipse cx="115" cy="130" rx="7" ry="5" fill="white" />
+        <ellipse cx="145" cy="130" rx="8" ry="5" fill="white" />
+        <ellipse cx="175" cy="130" rx="7" ry="5" fill="white" />
+        <ellipse cx="205" cy="130" rx="8" ry="5" fill="white" />
+        <!-- candle -->
+        <rect x="142" y="44" width="16" height="36" rx="4" fill="#fde68a" />
+        <rect x="144" y="50" width="4" height="24" rx="2" fill="#fbbf24" opacity="0.5" />
+        <!-- wick -->
+        <line x1="150" y1="44" x2="150" y2="38" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" />
+        <!-- flame outer -->
+        <g class="flame" id="flameOuter">
+          <ellipse cx="150" cy="30" rx="6" ry="10" fill="#fbbf24" opacity="0.9" />
+        </g>
+        <!-- flame inner -->
+        <g class="flame-inner" id="flameInner">
+          <ellipse cx="150" cy="32" rx="3" ry="6" fill="#fef3c7" />
+        </g>
+        <!-- smoke (hidden) -->
+        <g class="smoke" id="smoke">
+          <ellipse cx="150" cy="34" rx="2" ry="3" fill="#94a3b8" opacity="0.5" />
+        </g>
+        <!-- stars deco -->
+        <text x="68" y="165" font-size="14" opacity="0.5">✦</text>
+        <text x="218" y="165" font-size="14" opacity="0.5">✦</text>
+        <text x="88" y="115" font-size="11" opacity="0.4">✧</text>
+        <text x="204" y="115" font-size="11" opacity="0.4">✧</text>
+      </svg>
+    </div>
+
+    <button class="btn-blow" id="blowBtn" onclick="blowCandle()">🌬️ เป่าเทียน!</button>
+  </div>
+
+  <div class="card-overlay" id="cardOverlay">
+    <div class="birthday-card">
+      <div class="card-icon">🎉</div>
+      <div class="card-title">Happy Birthday!</div>
+      <div class="card-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="card-body">
+        มีความสุขมากๆนะครับข้าว<br>
+        คิดสิ่งใดอยู่ก็ขอให้สมคำปราถนา<br>
+        ขอให้ทุกความฝันของข้าวเป็นจริง<br>
+        และมีแต่สิ่งดีๆ รออยู่ข้างหน้าครับ555 ✨
+      </div>
+      <div class="card-sign">ขอให้โลกใบนี้ใจดีกับข้าวตลอดไปนะ 💕</div>
+      <br>
+      <button class="btn-close" onclick="closeCard()">จากใจต้า555 🙏</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animating = false;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function rand(a, b) { return Math.random() * (b - a) + a; }
+
+    function createBurst(x, y) {
+      const colors = ['#f472b6', '#e879f9', '#fbbf24', '#34d399', '#60a5fa', '#fb7185', '#a78bfa'];
+      for (let i = 0; i < 80; i++) {
+        const angle = rand(0, Math.PI * 2);
+        const speed = rand(2, 9);
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - rand(1, 3),
+          color: colors[Math.floor(rand(0, colors.length))],
+          alpha: 1,
+          size: rand(3, 7),
+          decay: rand(0.012, 0.022),
+          gravity: 0.12
+        });
+      }
+    }
+
+    function launchFireworks() {
+      const count = 7;
+      let launched = 0;
+      const interval = setInterval(() => {
+        const x = rand(canvas.width * 0.15, canvas.width * 0.85);
+        const y = rand(canvas.height * 0.1, canvas.height * 0.5);
+        createBurst(x, y);
+        launched++;
+        if (launched >= count) clearInterval(interval);
+      }, 220);
+    }
+
+    function animate() {
+      if (!animating && particles.length === 0) return;
+      animating = true;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.alpha > 0.02);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.98;
+        p.alpha -= p.decay;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.restore();
+      }
+      if (particles.length > 0 || animating) requestAnimationFrame(animate);
+      else { animating = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    }
+
+    function playMusic() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ac = new AC();
+        const notes = [523, 587, 659, 523, 659, 784, 880, 784, 698, 659, 523, 587, 523];
+        const dur = [0.3, 0.3, 0.6, 0.3, 0.3, 0.6, 0.3, 0.3, 0.3, 0.3, 0.6, 0.3, 0.7];
+        let t = ac.currentTime + 0.1;
+        notes.forEach((freq, i) => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.connect(g); g.connect(ac.destination);
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.22, t + 0.04);
+          g.gain.linearRampToValueAtTime(0, t + dur[i] - 0.04);
+          o.start(t); o.stop(t + dur[i]);
+          t += dur[i];
+        });
+      } catch (e) { }
+    }
+
+    function blowCandle() {
+      document.getElementById('flameOuter').classList.add('out');
+      document.getElementById('flameInner').classList.add('out');
+      document.getElementById('smoke').classList.add('show');
+      document.getElementById('blowBtn').classList.add('hidden');
+      playMusic();
+      setTimeout(() => {
+        launchFireworks();
+        animate();
+      }, 400);
+      setTimeout(() => {
+        document.getElementById('cardOverlay').classList.add('show');
+      }, 1800);
+    }
+
+    function closeCard() {
+      document.getElementById('cardOverlay').classList.remove('show');
+    }
+  </script>
+</body>
+
+</html>
